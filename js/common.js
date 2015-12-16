@@ -157,13 +157,14 @@ var dataUtil=(function(){
 	    		if (obj.list[i]) {
 	    			var oDiv=document.createElement("div");
 	    			oDiv.className="c-course-cn";
-	    			oDiv.innerHTML="<div class='c-course-img'><img src='' width='223' height='124'/></div>"
-					oDiv.innerHTML+="<p class='c-course-name'></p><p class='c-course-host'></p>"
-					oDiv.innerHTML+="<div class='c-course-co'><span class='c-course-count'></span></div>"
-					oDiv.innerHTML+="<p class='c-course-mo'>￥<span class='c-course-money'></span></p>"
-					oDiv.innerHTML+="<div class='c-course-hvr'><img src='' width='223' height='124'/>"
-					oDiv.innerHTML+="<h2 class='c-course-h2'></h2><p class='c-course-cnt'></p><p class='c-course-psn'></p>"
-					oDiv.innerHTML+="<p class='c-course-cate'></p></div><div class='c-course-des'><p></p></div>"
+	    			var cnt="<div class='c-course-img'><img src='' width='223' height='124'/></div>";
+	    			cnt+="<p class='c-course-name'></p><p class='c-course-host'></p>";
+	    			cnt+="<div class='c-course-co'><span class='c-course-count'></span></div>"
+	    			cnt+="<p class='c-course-mo'>￥<span class='c-course-money'></span></p>";
+	    			cnt+="<div class='c-course-hvr'><img src='' width='223' height='124'/>";
+	    			cnt+="<h2 class='c-course-h2'></h2><p class='c-course-cnt'></p><p class='c-course-psn'></p>";
+	    			cnt+="<p class='c-course-cate'></p></div><div class='c-course-des'><p></p></div>";
+					oDiv.innerHTML=cnt;
 					bdElem.appendChild(oDiv);
 					coreUtil.getByClass(oDiv,"c-course-img")[0].children[0].src=obj.list[i].middlePhotoUrl;
 	    			coreUtil.getByClass(oDiv,"c-course-name")[0].innerText=obj.list[i].name;
@@ -188,8 +189,7 @@ var dataUtil=(function(){
 	    		if (obj[i]) {
 	    			var oDiv=document.createElement("div");
 	    			oDiv.className="c-rank-cn";
-	    			oDiv.innerHTML="<img src='' width='50' height='50'>";
-					oDiv.innerHTML+="<div class='c-rank-des'><p></p><span></span></div>";
+	    			oDiv.innerHTML="<img src='' width='50' height='50'><div class='c-rank-des'><p></p><span></span></div>";
 					bdElem.appendChild(oDiv);
 					oDiv.children[0].src=obj[i].middlePhotoUrl;
 	    			oDiv.getElementsByTagName("p")[0].innerText=obj[i].name;
