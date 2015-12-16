@@ -9,41 +9,45 @@
 		});
 	};
 })();
-var coreUtil={
-	id:function(id){
-	return document.getElementById(id);
-	},
-	getByClass:function(element,names){
-	    if(element.getElementsByClassName){
-	        return element.getElementsByClassName(names);
-	    }else{
-	        var all_nodes=element.getElementsByTagName('*');
-	        var new_arr=[];
-	        names=names.split(" ");
-	        var para;
-	        var nodei;
-	        for(var i=0;i<all_nodes.length;i++){
-	            nodei=all_nodes[i];
-	            var nodeStr=' '+all_nodes[i].className+' ';
-	            para=true;
-	            for(var j=0;j<names.length;j++){
-	                var name=' '+names[j]+' ';
-	                if(nodeStr.indexOf(name)==-1){
-	                    para=false;
-	                    break;
-	                }
-	            }
-	            if(para){
-	                new_arr.push(nodei);
-	            }
-	        }
-	        return new_arr;
-	    }
+//将DOM core相关方法封装在IIFE
+var coreUtil=(function(){
+	return{
+		id:function(id){
+			return document.getElementById(id);
+		},
+		getByClass:function(element,names){
+		    if(element.getElementsByClassName){
+		        return element.getElementsByClassName(names);
+		    }else{
+		        var all_nodes=element.getElementsByTagName('*');
+		        var new_arr=[];
+		        names=names.split(" ");
+		        var para;
+		        var nodei;
+		        for(var i=0;i<all_nodes.length;i++){
+		            nodei=all_nodes[i];
+		            var nodeStr=' '+all_nodes[i].className+' ';
+		            para=true;
+		            for(var j=0;j<names.length;j++){
+		                var name=' '+names[j]+' ';
+		                if(nodeStr.indexOf(name)==-1){
+		                    para=false;
+		                    break;
+		                }
+		            }
+		            if(para){
+		                new_arr.push(nodei);
+		            }
+		        }
+		        return new_arr;
+		    }
+		}
 	}
-}
-//将事件相关方法存放到对象字面量中
-var eventUtil={
-	getTarget:function(event){
+})();
+//将事件相关方法封装在IIFE中
+var eventUtil=(function(){
+	return{
+		getTarget:function(event){
 		return event.target||event.srcElement;
 	},
 	addEvent:function(elem,type,listener){
@@ -60,190 +64,222 @@ var eventUtil={
 			return elem.detachEvent("on"+type,listener);
 		}
 	}
-};
-//将数据相关方法存放到对象字面量中
-var dataUtil={
-	getCookie:function(){
-		var thisCookie={};
-		var str=document.cookie;
-		if (str=="") {return thisCookie};
-		var arr=str.split("; ");
-		var n,v,a;
-		for (var i = 0; i <arr.length; i++) {
-			a=arr[i].split("=");
-			n=decodeURIComponent(a[0]);
-			v=decodeURIComponent(a[1]);
-			thisCookie[n]=v;
-		};
-		return thisCookie;
-	},
-	setCookie:function(name,value,expires,path,domain,secure){
-		var cookie=encodeURIComponent(name)+"="+encodeURIComponent(value);
-		if (expires) {//将日期对象转换为字符串
-			cookie+="; expires="+expires;
-			}
-		if (path) {cookie+="; path="+path};
-		if (domain) {cookie+="; domain="+domain};
-		if (secure) {cookie+="; secure="+secure};
-		document.cookie=cookie;
+	}
+})();
+//将数据相关方法存放在IIFE中
+var dataUtil=(function(){
+	return{
+		getCookie:function(){
+			var thisCookie={};
+			var str=document.cookie;
+			if (str=="") {return thisCookie};
+			var arr=str.split("; ");
+			var n,v,a;
+			for (var i = 0; i <arr.length; i++) {
+				a=arr[i].split("=");
+				n=decodeURIComponent(a[0]);
+				v=decodeURIComponent(a[1]);
+				thisCookie[n]=v;
+			};
+			return thisCookie;
+		},
+		setCookie:function(name,value,expires,path,domain,secure){
+			var cookie=encodeURIComponent(name)+"="+encodeURIComponent(value);
+			if (expires) {//将日期对象转换为字符串
+				cookie+="; expires="+expires;
+				}
+			if (path) {cookie+="; path="+path};
+			if (domain) {cookie+="; domain="+domain};
+			if (secure) {cookie+="; secure="+secure};
+			document.cookie=cookie;
 
-	},
-	getAjax:function(url,options,callback){
-		var xhr;
-		if (window.XMLHttpRequest) {
-			xhr=new XMLHttpRequest();
-		}else{
-			xhr=new ActiveXObject("Microsoft.XMLHTTP")
-		};
-		xhr.onreadystatechange=function(){
-			if (xhr.readyState==4) {
-				if (xhr.status==200) {
-					callback(xhr.responseText);
+		},
+		getAjax:function(url,options,callback){
+			var xhr;
+			if (window.XMLHttpRequest) {
+				xhr=new XMLHttpRequest();
+			}else{
+				xhr=new ActiveXObject("Microsoft.XMLHTTP")
+			};
+			xhr.onreadystatechange=function(){
+				if (xhr.readyState==4) {
+					if (xhr.status==200) {
+						callback(xhr.responseText);
+					}
 				}
 			}
-		}
-		xhr.open("get",url+"?"+dataUtil.serialize(options),true);
-		xhr.send(null);
-	},
-	getDataset:function(elem){
-	    if(elem.dataset){
-	      	return elem.dataset;
-	    }
-	    var datas = {};
-	    var attrs = elem.attributes;
-	    var nodeName,nodeNames;
-	    for(var i = 0,attr;attr = attrs[i];i++){
-	      	nodeName = attr.nodeName;
-	      	if(nodeName.indexOf('data-')!==-1){
-	        nodeNames = nodeName.slice(5).split("-");
-	        nodeName = nodeNames[0];
-	    } else{
-	        continue;
-	    }
-	    for(var j=1;j<nodeNames.length;j++){
-	        nodeName += nodeNames[j].slice(0,1).toUpperCase + nodeNames[j].slice(1);
-	    }
-	      	datas[nodeName] = attr.nodeValue;
-	      	return datas;
-	    }
-	},
-	serialize:function(data){
-        if(!data) return '';
-        var pairs = [];
-        for(var name in data){
-            if(!data.hasOwnProperty(name)) continue;
-            if(typeof data[name]==='function') continue;
-            var value = data[name].toString();
-            name = encodeURIComponent(name);
-            value = encodeURIComponent(value);
-            pairs.push(name+'='+value);
-        }
-        return pairs.join('&');
-    },
-    //读取课程(添加至tab区)
-    readCourse:function(str,bdElem,btnElem){
-    	var obj=JSON.parse(str);
-    	bdElem.innerHTML="";
-    	var index=obj.pagination.pageIndex,
-    	size=obj.pagination.pageSize,
-    	total=obj.pagination.totlePageCount;
-		for(var i=0;i<20;i++){
-    		if (obj.list[i]) {
-    			var oDiv=document.createElement("div");
-    			oDiv.className="c-course-cn";
-    			oDiv.innerHTML="<div class='c-course-img'><img src='' width='223' height='124'/></div><p class='c-course-name'></p><p class='c-course-host'></p><div class='c-course-co'><span class='c-course-count'></span></div><p class='c-course-mo'>￥<span class='c-course-money'></span></p><div class='c-course-hvr'><img src='' width='223' height='124'/><h2 class='c-course-h2'></h2><p class='c-course-cnt'></p><p class='c-course-psn'></p><p class='c-course-cate'></p></div><div class='c-course-des'><p></p></div>";
-				bdElem.appendChild(oDiv);
-				coreUtil.getByClass(oDiv,"c-course-img")[0].children[0].src=obj.list[i].middlePhotoUrl;
-    			coreUtil.getByClass(oDiv,"c-course-name")[0].innerText=obj.list[i].name;
-    			coreUtil.getByClass(oDiv,"c-course-host")[0].innerText=obj.list[i].provider;
-    			coreUtil.getByClass(oDiv,"c-course-count")[0].innerText=obj.list[i].learnerCount;
-    			coreUtil.getByClass(oDiv,"c-course-money")[0].innerText=obj.list[i].price;
-    			coreUtil.getByClass(oDiv,"c-course-hvr")[0].children[0].src=obj.list[i].middlePhotoUrl;
-    			coreUtil.getByClass(oDiv,"c-course-h2")[0].innerText=obj.list[i].name;
-    			coreUtil.getByClass(oDiv,"c-course-cnt")[0].innerText=obj.list[i].learnerCount;
-    			coreUtil.getByClass(oDiv,"c-course-psn")[0].innerText="发布者 : "+obj.list[i].provider;
-    			coreUtil.getByClass(oDiv,"c-course-cate")[0].innerText=obj.list[i].categoryName;
-    			coreUtil.getByClass(oDiv,"c-course-des")[0].children[0].innerText=obj.list[i].description;
-    			
-			};
-    	}
-    },
-    //读取课程(添加至流动列表)
-    readRank:function(str,bdElem){
-    	var obj=JSON.parse(str);
-    	bdElem.innerHTML="";
-    	for(var i=0;i<20;i++){
-    		if (obj[i]) {
-    			var oDiv=document.createElement("div");
-    			oDiv.className="c-rank-cn";
-    			oDiv.innerHTML="<img src='' width='50' height='50'><div class='c-rank-des'><p></p><span></span></div>";
-				bdElem.appendChild(oDiv);
-				oDiv.children[0].src=obj[i].middlePhotoUrl;
-    			oDiv.getElementsByTagName("p")[0].innerText=obj[i].name;
-    			oDiv.getElementsByTagName("span")[0].innerText=obj[i].learnerCount;
-    		};
-    	}
-    },
-    opt:function(pa,ps,ty){
-		return{	
-		pageNo:pa,
-		psize:ps,
-		type:ty
-		}
-	}
-};
-//操作节点属性的一些方法
-var changeUtil={
-	toNone:function(elem1,elem2){
-		elem1.style.display="none";
-   		elem2.style.display="none";		
-	},
-	toBlock:function(elem1,elem2){
-		elem1.style.display="block";
-		elem2.style.display="block";
-		elem2.style.left=(document.documentElement.clientWidth-elem2.clientWidth)/2+"px";
-		elem2.style.top=(document.documentElement.clientHeight-elem2.clientHeight)/2+"px";
-	},
-	//关注api
-	toAtten:function(elem){
-			elem.className="n-atten n-at-after";
-			elem.children[0].style.display="inline";
-			elem.children[1].textContent="已关注";
-			elem.children[1].innerText="已关注";
-	}
-}
-var index=0,timer;
-var animaUtil={
-	animaImage:function(elem1,elem2){//图片轮播&圆点变化
-		var offs1=elem1.children;//图片
-		var offs2=elem2.children;//按钮
-		var step=function(){
-			offs1[index].style.zIndex=0;
-			offs2[index].style.backgroundColor="#fff"
-			offs1[index].children[0].style.opacity=0;
-			index<offs1.length-1?index+=1:index=0;
-			offs1[index].style.zIndex=1;
-			offs2[index].style.backgroundColor="#000"
-			offs1[index].children[0].style.opacity=1.0;
-		}
-		timer=setInterval(step,5000);
-	},
-	animaMove:function(elem,attr,singleHi){
-		elem.style.transitionProperty="top";
-		elem.style.transitionTimingFunction="linear";
-		elem.style.transitionDuration="1s"
-		var moving=function(){
-			elem.style[attr]=elem.style[attr]||0;
-			elem.style.transitionProperty="top";
-			elem.style[attr]=parseInt(elem.style[attr])-singleHi+"px";
-			if(elem.style[attr]=="-1400px"){
-				elem.style.transitionProperty="none";
-				elem.style[attr]="0";
+			xhr.open("get",url+"?"+dataUtil.serialize(options),true);
+			xhr.send(null);
+		},
+		getDataset:function(elem){
+		    if(elem.dataset){
+		      	return elem.dataset;
+		    }
+		    var datas = {};
+		    var attrs = elem.attributes;
+		    var nodeName,nodeNames;
+		    for(var i = 0,attr;attr = attrs[i];i++){
+		      	nodeName = attr.nodeName;
+		      	if(nodeName.indexOf('data-')!==-1){
+		        nodeNames = nodeName.slice(5).split("-");
+		        nodeName = nodeNames[0];
+		    } else{
+		        continue;
+		    }
+		    for(var j=1;j<nodeNames.length;j++){
+		        nodeName += nodeNames[j].slice(0,1).toUpperCase + nodeNames[j].slice(1);
+		    }
+		      	datas[nodeName] = attr.nodeValue;
+		      	return datas;
+		    }
+		},
+		serialize:function(data){
+	        if(!data) return '';
+	        var pairs = [];
+	        for(var name in data){
+	            if(!data.hasOwnProperty(name)) continue;
+	            if(typeof data[name]==='function') continue;
+	            var value = data[name].toString();
+	            name = encodeURIComponent(name);
+	            value = encodeURIComponent(value);
+	            pairs.push(name+'='+value);
+	        }
+	        return pairs.join('&');
+	    },
+	    //读取课程(添加至tab区)
+	    readCourse:function(str,bdElem,btnElem){
+	    	var obj=JSON.parse(str);
+	    	bdElem.innerHTML="";
+	    	// var index=obj.pagination.pageIndex,
+	    	// size=obj.pagination.pageSize,
+	    	// total=obj.pagination.totlePageCount;
+			for(var i=0;i<20;i++){
+	    		if (obj.list[i]) {
+	    			var oDiv=document.createElement("div");
+	    			oDiv.className="c-course-cn";
+	    			oDiv.innerHTML="<div class='c-course-img'><img src='' width='223' height='124'/></div>"
+					oDiv.innerHTML+="<p class='c-course-name'></p><p class='c-course-host'></p>"
+					oDiv.innerHTML+="<div class='c-course-co'><span class='c-course-count'></span></div>"
+					oDiv.innerHTML+="<p class='c-course-mo'>￥<span class='c-course-money'></span></p>"
+					oDiv.innerHTML+="<div class='c-course-hvr'><img src='' width='223' height='124'/>"
+					oDiv.innerHTML+="<h2 class='c-course-h2'></h2><p class='c-course-cnt'></p><p class='c-course-psn'></p>"
+					oDiv.innerHTML+="<p class='c-course-cate'></p></div><div class='c-course-des'><p></p></div>"
+					bdElem.appendChild(oDiv);
+					coreUtil.getByClass(oDiv,"c-course-img")[0].children[0].src=obj.list[i].middlePhotoUrl;
+	    			coreUtil.getByClass(oDiv,"c-course-name")[0].innerText=obj.list[i].name;
+	    			coreUtil.getByClass(oDiv,"c-course-host")[0].innerText=obj.list[i].provider;
+	    			coreUtil.getByClass(oDiv,"c-course-count")[0].innerText=obj.list[i].learnerCount;
+	    			coreUtil.getByClass(oDiv,"c-course-money")[0].innerText=obj.list[i].price;
+	    			coreUtil.getByClass(oDiv,"c-course-hvr")[0].children[0].src=obj.list[i].middlePhotoUrl;
+	    			coreUtil.getByClass(oDiv,"c-course-h2")[0].innerText=obj.list[i].name;
+	    			coreUtil.getByClass(oDiv,"c-course-cnt")[0].innerText=obj.list[i].learnerCount;
+	    			coreUtil.getByClass(oDiv,"c-course-psn")[0].innerText="发布者 : "+obj.list[i].provider;
+	    			coreUtil.getByClass(oDiv,"c-course-cate")[0].innerText=obj.list[i].categoryName;
+	    			coreUtil.getByClass(oDiv,"c-course-des")[0].children[0].innerText=obj.list[i].description;
+	    			
+				};
+	    	}
+	    },
+	    //读取课程(添加至流动列表)
+	    readRank:function(str,bdElem){
+	    	var obj=JSON.parse(str);
+	    	bdElem.innerHTML="";
+	    	for(var i=0;i<20;i++){
+	    		if (obj[i]) {
+	    			var oDiv=document.createElement("div");
+	    			oDiv.className="c-rank-cn";
+	    			oDiv.innerHTML="<img src='' width='50' height='50'>";
+					oDiv.innerHTML+="<div class='c-rank-des'><p></p><span></span></div>";
+					bdElem.appendChild(oDiv);
+					oDiv.children[0].src=obj[i].middlePhotoUrl;
+	    			oDiv.getElementsByTagName("p")[0].innerText=obj[i].name;
+	    			oDiv.getElementsByTagName("span")[0].innerText=obj[i].learnerCount;
+	    		};
+	    	}
+	    },
+	    opt:function(pa,ps,ty){
+			return{	
+			pageNo:pa,
+			psize:ps,
+			type:ty
 			}
 		}
-		setInterval(moving,5000);
 	}
-};
+})();
+//操作节点属性的一些方法
+var changeUtil=(function(){
+	var toNone=function(elem1,elem2){
+			elem1.style.display="none";
+	   		elem2.style.display="none";		
+		};
+	var	toBlock=function(elem1,elem2){
+			elem1.style.display="block";
+			elem2.style.display="block";
+			elem2.style.left=(document.documentElement.clientWidth-elem2.clientWidth)/2+"px";
+			elem2.style.top=(document.documentElement.clientHeight-elem2.clientHeight)/2+"px";
+		};
+		//关注api
+	var	toAtten=function(elem){
+				elem.className="n-atten n-at-after";
+				elem.children[0].style.display="inline";
+				elem.children[1].textContent="已关注";
+				elem.children[1].innerText="已关注";
+		}
+	return{
+		toBlock:toBlock,
+		toNone:toNone,
+		toAtten:toAtten
+	}
+})();
+var animaUtil=(function(){
+	var index=0,timer;
+	var animaImage=function(elem1,elem2){//图片轮播&圆点变化
+			var offs1=elem1.children;//图片
+			var offs2=elem2.children;//按钮
+			function step(){
+				offs1[index].style.zIndex=0;
+				offs2[index].style.backgroundColor="#fff"
+				offs1[index].children[0].style.opacity=0;
+				index<offs1.length-1?index+=1:index=0;
+				offs1[index].style.zIndex=1;
+				offs2[index].style.backgroundColor="#000"
+				offs1[index].children[0].style.opacity=1.0;
+			}
+			this.timer=setInterval(step,5000);
+		};
+	var	animaClick=function(e,elem){
+			e=e||event||window.event;
+			coreUtil.id(elem).children[index].style.zIndex=0;
+			eventUtil.getTarget(e).parentNode.children[index].style.backgroundColor="#fff";
+			coreUtil.id(elem).children[index].children[0].style.opacity=0;
+			index=parseInt(dataUtil.getDataset(eventUtil.getTarget(e)).index);
+			coreUtil.id(elem).children[index].style.zIndex=1;
+			eventUtil.getTarget(e).style.backgroundColor="#000";
+			coreUtil.id(elem).children[index].children[0].style.opacity=1;
+		};
+	var	animaMove=function(elem,attr,singleHi){
+			elem.style.transitionProperty="top";
+			elem.style.transitionTimingFunction="linear";
+			elem.style.transitionDuration="1s"
+			var moving=function(){
+				elem.style[attr]=elem.style[attr]||0;
+				elem.style.transitionProperty="top";
+				elem.style[attr]=parseInt(elem.style[attr])-singleHi+"px";
+				if(elem.style[attr]=="-1400px"){
+					elem.style.transitionProperty="none";
+					elem.style[attr]="0";
+				}
+			}
+			setInterval(moving,5000);
+		}
+	return{
+		index:index,
+		timer:timer,
+		animaMove:animaMove,
+		animaImage:animaImage,
+		animaClick:animaClick
+	}
+})();
 //检查cookie是否存在
 	function checkCookie(){
 		var mycookie=dataUtil.getCookie();
@@ -351,7 +387,7 @@ window.onload=function(){
 	//轮播图
 	animaUtil.animaImage(coreUtil.id("p-images"),coreUtil.id("p-btn"));
 	eventUtil.addEvent(coreUtil.id("p-parent"),"mouseover",function(){
-		clearInterval(timer);
+		clearInterval(animaUtil.timer);
 	});
 	eventUtil.addEvent(coreUtil.id("p-parent"),"mouseout",function(){
 		animaUtil.animaImage(coreUtil.id("p-images"),coreUtil.id("p-btn"));
@@ -359,13 +395,7 @@ window.onload=function(){
 	eventUtil.addEvent(coreUtil.id("p-btn"),"click",function(e){
 		e=e||event||window.event;
 		if (eventUtil.getTarget(e)==e.currentTarget||eventUtil.getTarget(e).style.backgroundColor=="#000") {return;};
-		coreUtil.id("p-images").children[index].style.zIndex=0;
-		eventUtil.getTarget(e).parentNode.children[index].style.backgroundColor="#fff";
-		coreUtil.id("p-images").children[index].children[0].style.opacity=0;
-		index=parseInt(dataUtil.getDataset(eventUtil.getTarget(e)).index);
-		coreUtil.id("p-images").children[index].style.zIndex=1;
-		eventUtil.getTarget(e).style.backgroundColor="#000";
-		coreUtil.id("p-images").children[index].children[0].style.opacity=1;
+		animaUtil.animaClick(e,"p-images");
 	});
 	//video播放
 	eventUtil.addEvent(coreUtil.id("c-video"),"click",function(){
